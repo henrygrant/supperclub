@@ -67,8 +67,9 @@ model VerificationToken {
 }
 
 model Group {
-  id    String        @id @default(cuid())
-  name  String
+  id        String        @id @default(cuid())
+  name      String
+  shareCode String?
   users UserInGroup[]
 }
 

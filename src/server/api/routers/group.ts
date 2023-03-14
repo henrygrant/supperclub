@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { randomBytes } from "crypto";
 
 import {
   createTRPCRouter,
@@ -96,5 +97,36 @@ export const groupRouter = createTRPCRouter({
           },
         },
       });
+    }),
+  generateCodeForGroup: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const buf = randomBytes(16).toString("hex");
+        const lookup = await ctx.prisma.group.findFirst({
+          where: {
+            shareCode: buf,
+          },
+        });
+        if (!lookup) {
+          await ctx.prisma.group.update({
+            where: {
+              id: input.groupId,
+            },
+            data: {
+              shareCode: buf,
+            },
+          });
+          return buf;
+        } else {
+          console.error("secret code collision. fix this");
+        }
+      } catch (e) {
+        console.log(e);
+      }
     }),
 });
