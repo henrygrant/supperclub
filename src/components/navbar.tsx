@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import Link from "next/link";
 import AuthShowcase from "./authShowcase";
 import Image from "next/image";

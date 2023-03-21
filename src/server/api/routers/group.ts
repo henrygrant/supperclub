@@ -262,11 +262,11 @@ export const groupRouter = createTRPCRouter({
               where: {
                 userId_groupId: {
                   groupId: input.groupId,
-                  userId: losers[i].userId,
+                  userId: losers[i]?.userId as string,
                 },
               },
               data: {
-                points: losers[i].points + 1,
+                points: (losers[i]?.points as number) + 1,
               },
             });
           }
