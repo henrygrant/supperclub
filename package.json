@@ -6,8 +6,9 @@
     "build": "next build",
     "dev": "next dev",
     "postinstall": "prisma generate",
-    "studio": "prisma studio",
-    "migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:format": "prisma format",
+    "prisma:migrate": "prisma migrate dev",
     "lint": "next lint",
     "start": "next start",
     "db-seed": "NODE_ENV=development prisma db seed"

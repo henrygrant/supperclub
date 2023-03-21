@@ -22,7 +22,7 @@ model Example {
 
 // Necessary for Next auth
 model Account {
-  id                String  @id @default(cuid())
+  id                String   @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -34,7 +34,9 @@ model Account {
   scope             String?
   id_token          String? // @db.Text
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([provider, providerAccountId])
 }
@@ -45,6 +47,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model User {
@@ -56,31 +60,58 @@ model User {
   accounts      Account[]
   sessions      Session[]
   groups        UserInGroup[]
+  Group         Group[]
+  RollEvent     RollEvent[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
 }
 
 model Group {
-  id        String        @id @default(cuid())
-  name      String
-  shareCode String?
-  users UserInGroup[]
+  dttmCreated DateTime      @default(now())
+  id          String        @id @default(cuid())
+  name        String
+  shareCode   String?
+  users       UserInGroup[]
+  ownerUserId String
+  owner       User          @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  RollEvent   RollEvent[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model UserInGroup {
-  user       User   @relation(fields: [userId], references: [id])
-  userId     String
-  group      Group  @relation(fields: [groupId], references: [id])
-  groupId    String
-  points     Int    @default(0)
-  suggestion String?
-  isAdmin    Boolean @default(false)
+  dttmCreated DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  group       Group    @relation(fields: [groupId], references: [id])
+  groupId     String
+  points      Int      @default(0)
+  suggestion  String?
+  isAdmin     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@id([userId, groupId])
+}
+
+model RollEvent {
+  id                String   @id @default(cuid())
+  dttmCreated       DateTime @default(now())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id]) //who created
+  groupId           String
+  group             Group    @relation(fields: [groupId], references: [id])
+  winningSuggestion String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }

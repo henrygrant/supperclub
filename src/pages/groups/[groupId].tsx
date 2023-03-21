@@ -3,7 +3,14 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import Layout from "~/components/layout";
 import { api } from "~/utils/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Dancing_Script } from "next/font/google";
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  weight: "400",
+  style: "normal",
+});
 
 const Group: NextPage = () => {
   const router = useRouter();
@@ -20,19 +27,22 @@ const Group: NextPage = () => {
 
   if (isLoading) return <div>Loading...</div>;
   if (!groupId || !groupInfo) return <div>No group found</div>;
-  if (!groupInfo) return <div>No group found</div>;
 
   return (
     <Layout>
       <div className="flex h-screen">
         <div className="m-auto">
-          <h1 className="mb-4 text-center text-xl">{groupInfo.name}</h1>
-
+          <h1 className={`${dancingScript.className} mb- text-center text-9xl`}>
+            {groupInfo.name}
+          </h1>
+          <div className="my-5 flex justify-center">
+            <RollTheDice groupId={groupId} />
+          </div>
           {/* <AdminControls /> */}
-          <div className="flex w-full gap-2">
+          <div className="mx-3 flex flex-col">
             <ManageSuggestion groupId={groupId} />
-            <MemberList groupId={groupId} />
             <CodeGenerator groupId={groupId} />
+            <MemberList groupId={groupId} />
           </div>
         </div>
       </div>
@@ -41,6 +51,38 @@ const Group: NextPage = () => {
 };
 
 export default Group;
+
+const RollTheDice: React.FC<{ groupId: string }> = ({ groupId }) => {
+  const utils = api.useContext();
+  const { data: sessionData } = useSession();
+  const group = api.group.getOneById.useQuery({
+    groupId,
+  });
+  const rollEvents = api.group.getRollEvents.useQuery({
+    groupId,
+  });
+  const rollTheDice = api.group.rollTheDice.useMutation({
+    onSettled: async () => {
+      await utils.group.getRollEvents.invalidate();
+      await utils.group.getOneById.invalidate();
+    },
+  });
+  return (
+    <button
+      onClick={(event) => {
+        event.preventDefault();
+        rollTheDice.mutate({ groupId });
+      }}
+      className="ml-3 border border-black px-2 no-underline transition hover:bg-black/10"
+      disabled={
+        !sessionData?.user.isAdmin &&
+        group?.data?.ownerUserId !== sessionData?.user.id
+      }
+    >
+      Roll Away!
+    </button>
+  );
+};
 
 const ManageSuggestion: React.FC<{ groupId: string }> = ({ groupId }) => {
   const utils = api.useContext();
@@ -61,12 +103,13 @@ const ManageSuggestion: React.FC<{ groupId: string }> = ({ groupId }) => {
   const [tempSuggestion, setTempSuggestion] = useState("");
 
   return (
-    <div className="flex flex-grow justify-center border p-3">
+    <div className="mb-3 justify-center border border-black p-3">
+      <h2 className={`${dancingScript.className} text-2xl`}>
+        Your Current Suggestion:
+      </h2>
       {myCurrentSuggestion() ? (
-        <div className="flex items-center">
-          <h2 className="text-lg">
-            Current Suggestion: {myCurrentSuggestion()}
-          </h2>
+        <div className="flex items-center justify-between">
+          <div className="mt-1">{myCurrentSuggestion()}</div>
           <button
             onClick={(event) => {
               event.preventDefault();
@@ -77,13 +120,14 @@ const ManageSuggestion: React.FC<{ groupId: string }> = ({ groupId }) => {
                   groupId: group.data.id,
                 });
             }}
-            className="rounded-full px-10 py-3 font-semibold no-underline transition hover:bg-black/10"
+            className="ml-3 border border-black px-2 no-underline transition hover:bg-black/10"
           >
             Reset
           </button>
         </div>
       ) : (
         <form
+          className="flex items-center justify-between"
           onSubmit={(event) => {
             event.preventDefault();
             group.data &&
@@ -96,7 +140,7 @@ const ManageSuggestion: React.FC<{ groupId: string }> = ({ groupId }) => {
         >
           <input
             type="text"
-            className="border-2 border-black"
+            className="mt-1 border border-black pl-2"
             placeholder="restaurant suggestion"
             minLength={2}
             maxLength={36}
@@ -106,7 +150,7 @@ const ManageSuggestion: React.FC<{ groupId: string }> = ({ groupId }) => {
           <button
             disabled={!tempSuggestion}
             type="submit"
-            className="rounded-full px-10 py-3 font-semibold no-underline transition hover:bg-black/10"
+            className="ml-3 border border-black px-2 no-underline transition hover:bg-black/10"
           >
             Submit
           </button>
@@ -120,15 +164,23 @@ const MemberList: React.FC<{ groupId: string }> = ({ groupId }) => {
   const group = api.group.getOneById.useQuery({
     groupId,
   });
-
   return (
-    <div className="flex-grow border p-3">
-      <h2 className="mt-4 text-lg">Members:</h2>
+    <div className="border border-black p-3">
+      <h2 className={`${dancingScript.className} text-2xl`}>Members:</h2>
       {group.data &&
         group.data.users.map((groupuser) => (
-          <div key={groupuser.user.id} className="flex justify-between">
-            <div>{groupuser.user.name}</div>
-            <div>{groupuser.points}</div>
+          <div key={groupuser.user.id} className="grid grid-cols-10 gap-2">
+            <div className="col-span-5 flex">
+              <div>{groupuser.user.name}</div>
+              {group.data?.ownerUserId === groupuser.user.id && (
+                <div className="ml-1">{"<O>"}</div>
+              )}
+              {groupuser.isAdmin && <div className="ml-1">{" <A> "}</div>}
+            </div>
+            <div className="col-span-4 text-center">
+              {groupuser.suggestion || "null"}
+            </div>
+            <div className="col-span-1 text-center">{groupuser.points}</div>
           </div>
         ))}
     </div>
@@ -145,40 +197,29 @@ const CodeGenerator: React.FC<{ groupId: string }> = ({ groupId }) => {
   const group = api.group.getOneById.useQuery({
     groupId: groupId,
   });
+  const shareUrl = (code: string) => {
+    return `${window.location.origin}/invite/${code}`;
+  };
   return (
-    <div className="flex flex-grow gap-3 border p-3">
-      <div>{group?.data?.shareCode ? group.data.shareCode : "No Code Set"}</div>
+    <div className="mb-3 gap-3 border border-black p-3">
       <div>
-        <button
-          onClick={() => {
-            const code = generateCodeForGroup.mutate({ groupId: groupId });
-            console.log(code);
-          }}
-        >
-          Generate
-        </button>
+        <h2 className={`${dancingScript.className} text-2xl`}>Share:</h2>
+        {group?.data?.shareCode ? (
+          <div>
+            <p>{shareUrl(group.data.shareCode)}</p>
+          </div>
+        ) : (
+          <div>
+            <button
+              onClick={() => {
+                generateCodeForGroup.mutate({ groupId: groupId });
+              }}
+            >
+              Generate a Share Link
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
-// const AdminControls: React.FC<{ groupId: string }> = ({ groupId }) => {
-//   const group = api.group.getOneById.useQuery(
-//     {
-//       groupId: groupId,
-//     },
-//     { enabled: !!groupId }
-//   );
-
-//   return (
-//     <div>
-//       <h2 className="mt-4 text-lg">Admin:</h2>
-//       {group.data &&
-//         group.data.users.map((groupuser) => (
-//           <div key={groupuser.user.id} className="flex justify-between">
-//             <div>{groupuser.user.name}</div>
-//             <div>{groupuser.points}</div>
-//           </div>
-//         ))}
-//     </div>
-//   );
-// };
