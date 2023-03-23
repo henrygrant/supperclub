@@ -75,6 +75,7 @@ const RollTheDice: React.FC<{ groupId: string }> = ({ groupId }) => {
         event.preventDefault();
         rollTheDice.mutate({ groupId });
       }}
+      disabled={rollTheDice.isLoading}
       className="ml-3 border border-black px-2 no-underline transition hover:bg-black/10"
       // disabled={
       //   !sessionData?.user.isAdmin &&

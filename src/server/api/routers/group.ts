@@ -228,13 +228,19 @@ export const groupRouter = createTRPCRouter({
           throw "Couldn't find group";
         }
 
-        const highestScore = Math.max(...group?.users?.map((u) => u.points));
-        const winners = group?.users.filter((u) => u.points === highestScore);
+        const highestScore = Math.max(
+          ...group?.users?.filter((u) => u.suggestion).map((u) => u.points)
+        );
+        const winners = group?.users
+          .filter((u) => u.suggestion)
+          .filter((u) => u.points === highestScore);
         const winner =
           winners.length === 1
             ? winners[0]
             : winners[Math.floor(Math.random() * winners.length)];
-        const losers = group?.users.filter((u) => u.userId !== winner?.userId);
+        const losers = group?.users
+          .filter((u) => u.suggestion)
+          .filter((u) => u.userId !== winner?.userId);
 
         if (winner && winner.suggestion) {
           await ctx.prisma.rollEvent.create({
