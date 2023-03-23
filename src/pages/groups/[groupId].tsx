@@ -32,7 +32,9 @@ const Group: NextPage = () => {
     <Layout>
       <div className="flex h-screen">
         <div className="m-auto">
-          <h1 className={`${dancingScript.className} mb- text-center text-9xl`}>
+          <h1
+            className={`${dancingScript.className} mx-2 text-center text-6xl lg:text-9xl`}
+          >
             {groupInfo.name}
           </h1>
           <div className="my-5 flex justify-center">
@@ -74,10 +76,10 @@ const RollTheDice: React.FC<{ groupId: string }> = ({ groupId }) => {
         rollTheDice.mutate({ groupId });
       }}
       className="ml-3 border border-black px-2 no-underline transition hover:bg-black/10"
-      disabled={
-        !sessionData?.user.isAdmin &&
-        group?.data?.ownerUserId !== sessionData?.user.id
-      }
+      // disabled={
+      //   !sessionData?.user.isAdmin &&
+      //   group?.data?.ownerUserId !== sessionData?.user.id
+      // }
     >
       Roll Away!
     </button>
@@ -178,7 +180,7 @@ const MemberList: React.FC<{ groupId: string }> = ({ groupId }) => {
               {groupuser.isAdmin && <div className="ml-1">{" <A> "}</div>}
             </div>
             <div className="col-span-4 text-center">
-              {groupuser.suggestion || "null"}
+              {groupuser.suggestion || "no suggestion set"}
             </div>
             <div className="col-span-1 text-center">{groupuser.points}</div>
           </div>

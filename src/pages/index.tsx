@@ -24,7 +24,11 @@ const Home: NextPage = () => {
       <div className="flex min-h-screen flex-col items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
           <Image src={supperclubLogo} alt="Supper Club" />
-          <h1 className={`${dancingScript.className} text-9xl`}>Supper Club</h1>
+          <h1
+            className={`${dancingScript.className} text-center text-7xl lg:text-9xl`}
+          >
+            Supper Club
+          </h1>
           <div className="col-ga mx-3 flex-col">
             {sessionData && (
               <>
@@ -48,11 +52,9 @@ const CreateGroup: React.FC = () => {
   const postGroup = api.group.postGroup.useMutation();
   return (
     <div className="mb-3 flex flex-grow flex-col border border-black p-3">
-      <h2 className={`${dancingScript.className} mb-1 text-2xl`}>
-        Create a Group
-      </h2>
+      <h2 className={`${dancingScript.className} text-2xl`}>Create a Group</h2>
       <form
-        className=""
+        className="flex flex-col items-center md:flex-row"
         onSubmit={(event) => {
           event.preventDefault();
           const newGroup = postGroup
@@ -67,7 +69,7 @@ const CreateGroup: React.FC = () => {
       >
         <input
           type="text"
-          className="border border-black pl-2"
+          className="mt-1 border border-black pl-2"
           placeholder="group name"
           minLength={2}
           maxLength={36}
@@ -76,7 +78,7 @@ const CreateGroup: React.FC = () => {
         />
         <button
           type="submit"
-          className="ml-3 border border-black px-2 no-underline transition hover:bg-black/10"
+          className="border border-black px-2 no-underline transition hover:bg-black/10 sm:mt-2 md:ml-3 md:mt-1"
         >
           Submit
         </button>
