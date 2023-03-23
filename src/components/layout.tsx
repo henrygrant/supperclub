@@ -1,5 +1,5 @@
 import Navbar from "./navbar";
-import Footer from "./footer";
+// import Footer from "./footer";
 import Head from "next/head";
 import { type ReactNode } from "react";
 
@@ -13,7 +13,7 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
       </Head>
       <Navbar />
       <main>{children}</main>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };
