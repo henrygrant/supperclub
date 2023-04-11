@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "postinstall": "prisma generate",
+    "planetscale:connect": "pscale connect supperclub main",
     "prisma:studio": "prisma studio",
     "prisma:format": "prisma format",
     "prisma:migrate": "prisma migrate dev",

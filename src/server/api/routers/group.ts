@@ -174,6 +174,9 @@ export const groupRouter = createTRPCRouter({
         include: {
           user: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
     }),
   generateCodeForGroup: protectedProcedure

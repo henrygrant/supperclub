@@ -25,6 +25,10 @@ const Group: NextPage = () => {
     { enabled: !!groupId }
   );
 
+  const rollEvents = api.group.getRollEvents.useQuery({
+    groupId: groupId as string,
+  });
+
   if (isLoading) return <div>Loading...</div>;
   if (!groupId || !groupInfo) return <div>No group found</div>;
 
@@ -32,10 +36,26 @@ const Group: NextPage = () => {
     <Layout>
       <div className="flex h-screen">
         <div className="m-auto">
-          <h1
-            className={`${dancingScript.className} mx-2 text-center text-6xl lg:text-9xl`}
-          >
-            {groupInfo.name}
+          <h1 className="mx-2 text-center">
+            <span
+              className={`${dancingScript.className} block text-6xl lg:text-9xl`}
+            >
+              {groupInfo.name}
+            </span>
+            {rollEvents?.data?.length ? (
+              <>
+                <span className={`${dancingScript.className} block text-4xl`}>
+                  is going to
+                </span>
+                <span
+                  className={`${dancingScript.className} text-center text-6xl lg:text-9xl`}
+                >
+                  {rollEvents.data[0]?.winningSuggestion}
+                </span>
+              </>
+            ) : (
+              <></>
+            )}
           </h1>
           <div className="my-5 flex justify-center">
             <RollTheDice groupId={groupId} />
@@ -58,9 +78,6 @@ const RollTheDice: React.FC<{ groupId: string }> = ({ groupId }) => {
   const utils = api.useContext();
   const { data: sessionData } = useSession();
   const group = api.group.getOneById.useQuery({
-    groupId,
-  });
-  const rollEvents = api.group.getRollEvents.useQuery({
     groupId,
   });
   const rollTheDice = api.group.rollTheDice.useMutation({
