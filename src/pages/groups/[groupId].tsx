@@ -5,6 +5,7 @@ import Layout from "~/components/layout";
 import { api } from "~/utils/api";
 import { useState } from "react";
 import { Dancing_Script } from "next/font/google";
+import { formatDateTime } from "~/utils/date";
 
 const dancingScript = Dancing_Script({
   subsets: ["latin"],
@@ -65,6 +66,7 @@ const Group: NextPage = () => {
             <ManageSuggestion groupId={groupId} />
             <CodeGenerator groupId={groupId} />
             <MemberList groupId={groupId} />
+            <History groupId={groupId} />
           </div>
         </div>
       </div>
@@ -73,6 +75,26 @@ const Group: NextPage = () => {
 };
 
 export default Group;
+
+const History: React.FC<{ groupId: string }> = ({ groupId }) => {
+  const rollEvents = api.group.getRollEvents.useQuery({
+    groupId: groupId,
+  });
+  return (
+    <div className="mb-3 justify-center border border-black p-3">
+      <h2 className={`${dancingScript.className} text-2xl`}>History:</h2>
+      <table className="w-full">
+        {rollEvents?.data?.map((rollEvent) => (
+          <tr key={rollEvent.id}>
+            <td>{rollEvent.winningSuggestion}</td>
+            <td>{rollEvent.user.name}</td>
+            <td>{formatDateTime(rollEvent.dttmCreated)}</td>
+          </tr>
+        ))}
+      </table>
+    </div>
+  );
+};
 
 const RollTheDice: React.FC<{ groupId: string }> = ({ groupId }) => {
   const utils = api.useContext();
@@ -185,7 +207,7 @@ const MemberList: React.FC<{ groupId: string }> = ({ groupId }) => {
     groupId,
   });
   return (
-    <div className="border border-black p-3">
+    <div className="mb-3 border border-black p-3">
       <h2 className={`${dancingScript.className} text-2xl`}>Members:</h2>
       {group.data &&
         group.data.users.map((groupuser) => (
